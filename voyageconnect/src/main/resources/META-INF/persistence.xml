@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <persistence-unit name="voyageconnect-pu" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Liste des classes d'entités -->
+        <class>com.voyageconnect.model.User</class>
+        <class>com.voyageconnect.model.Destination</class>
+        <class>com.voyageconnect.model.Vol</class>
+        <class>com.voyageconnect.model.Hotel</class>
+        <class>com.voyageconnect.model.Circuit</class>
+        <class>com.voyageconnect.model.Reservation</class>
+        <class>com.voyageconnect.model.Paiement</class>
+        <class>com.voyageconnect.model.Avis</class>
+        <class>com.voyageconnect.model.Notification</class>
+
+        <properties/>
+
+    </persistence-unit>
+
+</persistence>
