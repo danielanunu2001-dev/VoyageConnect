@@ -17,9 +17,9 @@ Ce projet a été construit sans aucun framework de haut niveau comme Spring Boo
 - **Frameworks** :
   - **Spring Framework (5.3)** : Cœur de l'application pour l'injection de dépendances (IoC), la programmation orientée aspect (AOP) et la gestion des transactions (TX).
   - **Spring Security (5.8)** : Gestion de l'authentification et des autorisations.
-  - **Java EE** : Servlets (API 5.0) et JavaServer Pages (JSP 3.1) pour le routage et le rendu des vues.
+  - **Java EE (API `javax`)** : Servlets (API 4.0) et JavaServer Pages (JSP 2.3) pour le routage et le rendu des vues.
 - **Accès aux données** :
-  - **Hibernate (5.6)** : Implémentation de référence pour JPA (Java Persistence API) pour le mapping objet-relationnel (ORM).
+  - **Hibernate (5.6)** : Implémentation de référence pour JPA (`javax.persistence`) pour le mapping objet-relationnel (ORM).
 - **Utilitaires** :
   - **JavaMail (2.0)** : Envoi de notifications par email.
   - **iText (7.2)** : Génération de documents PDF (factures).
@@ -28,16 +28,16 @@ Ce projet a été construit sans aucun framework de haut niveau comme Spring Boo
 ### Frontend
 - **Structure** : HTML5 pur
 - **Style** : CSS3 pur et **Bootstrap 5** pour un design responsive.
-- **Interactivité** : JavaScript natif (vanilla JS) pour les appels AJAX et la manipulation dynamique du DOM.
-- **Contrainte** : Aucun framework JavaScript (React, Vue, Angular) n'est utilisé.
+- **Interactivité** : JavaScript natif (vanilla JS).
 
 ### Base de Données
-- **SGBDR** : PostgreSQL (Dialecte `PostgreSQL10Dialect`).
+- **SGBDR** : PostgreSQL.
 - **Pooling de connexions** : C3P0.
 
 ### Build & Déploiement
 - **Gestion de projet** : Apache Maven
-- **Serveur d'application** : Conçu pour être déployé sur Apache Tomcat 10 ou WildFly 30.
+- **Serveur d'application recommandé** : **Apache Tomcat 9** ou tout autre serveur compatible avec `javax.servlet`.
+- **Développement local** : Plugin Maven Jetty 9.
 
 ### Tests
 - **Tests unitaires** : JUnit 5
@@ -49,24 +49,10 @@ Ce projet a été construit sans aucun framework de haut niveau comme Spring Boo
 
 Le projet suit une architecture en couches basée sur le design pattern **Modèle-Vue-Contrôleur (MVC)** pour assurer une séparation claire des préoccupations.
 
-```
-com.voyageconnect/
-├── controller/  // Couche Contrôleur (Servlets)
-├── service/     // Couche Métier (Logique applicative)
-├── dao/         // Couche d'Accès aux Données (JPA/Hibernate)
-├── model/       // Couche Modèle (Entités JPA)
-├── security/    // Configuration de la sécurité
-├── config/      // Configuration Spring
-└── util/        // Classes utilitaires
-```
-
-- **`controller` (Contrôleur)** : Contient les Servlets Java. Chaque servlet agit comme un contrôleur qui reçoit les requêtes HTTP, interagit avec la couche `service` pour traiter les demandes, puis sélectionne la vue (JSP) appropriée pour renvoyer la réponse au client.
-
-- **`service` (Couche Métier)** : Contient la logique métier de l'application. C'est ici que sont définies les transactions (`@Transactional`). Les services coordonnent les appels aux différents DAO pour accomplir une fonctionnalité complète (par exemple, "créer une réservation et mettre à jour les disponibilités").
-
-- **`dao` (Data Access Object)** : Contient les interfaces et les implémentations pour l'accès aux données. Cette couche est responsable de toutes les interactions avec la base de données via l'EntityManager de JPA. Elle isole le reste de l'application des détails de la persistance.
-
-- **`model` (Modèle)** : Contient les entités JPA, qui sont des classes Java simples (POJOs) annotées pour être mappées à des tables de la base de données. Elles représentent l'état et la structure des données de l'application.
+- **`controller` (Contrôleur)** : Contient les Servlets, qui gèrent les requêtes HTTP et coordonnent les réponses.
+- **`service` (Couche Métier)** : Contient la logique métier et la gestion des transactions.
+- **`dao` (Data Access Object)** : Responsable de l'accès aux données via JPA/Hibernate.
+- **`model` (Modèle)** : Contient les entités JPA (`javax.persistence`) qui représentent les données.
 
 ---
 
@@ -75,103 +61,52 @@ com.voyageconnect/
 Suivez ces étapes pour configurer et lancer le projet sur votre machine locale.
 
 ### 1. Prérequis
-Assurez-vous d'avoir les outils suivants installés :
 - **JDK 11** ou supérieur.
 - **Apache Maven 3.6** ou supérieur.
 - **PostgreSQL 12** ou supérieur.
-- Un serveur d'applications comme **Apache Tomcat 10**.
 
 ### 2. Configuration de la Base de Données
-Le projet est configuré pour se connecter à une base de données PostgreSQL.
-
-1.  **Créez la base de données** via `psql` ou un client SQL :
+1.  **Créez la base de données** :
     ```sql
     CREATE DATABASE voyageconnect;
     ```
-
-2.  **Créez un utilisateur dédié** (recommandé) :
+2.  **Créez un utilisateur** :
     ```sql
     CREATE USER user WITH PASSWORD 'password';
     GRANT ALL PRIVILEGES ON DATABASE voyageconnect TO user;
     ```
-    *Note : Si vous utilisez des identifiants différents, mettez à jour le fichier de configuration à l'étape suivante.*
+3.  **Mettez à jour `src/main/resources/application.properties`** si vos identifiants sont différents.
 
-### 3. Configuration de l'Application
-Les informations de connexion à la base de données sont externalisées.
+### 3. Lancement de l'Application (Développement)
+La méthode la plus simple pour lancer l'application en mode développement est d'utiliser le plugin Maven Jetty.
 
-1.  Naviguez vers `src/main/resources/`.
-2.  Le fichier `application.properties` contient les informations de connexion par défaut :
-    ```properties
-    db.driver=org.postgresql.Driver
-    db.url=jdbc:postgresql://localhost:5432/voyageconnect
-    db.username=user
-    db.password=password
-    ```
-3.  Modifiez ce fichier si vos identifiants PostgreSQL sont différents.
-
-### 4. Peuplement de la Base de Données
-Le projet est fourni avec deux scripts SQL pour initialiser la base de données :
-- `schema.sql` : Crée toutes les tables et les relations.
-- `data.sql` : Insère des données de test (un admin, un client, des destinations, etc.).
-
-Hibernate est configuré avec `hbm2ddl.auto = update`, ce qui signifie qu'il créera ou mettra à jour le schéma automatiquement au premier démarrage. Cependant, pour un contrôle total, il est recommandé d'exécuter manuellement ces scripts via un client SQL sur la base `voyageconnect` avant de lancer l'application.
+```bash
+# À la racine du projet (contenant le pom.xml)
+mvn jetty:run
+```
+L'application sera accessible à l'adresse `http://localhost:8080/voyageconnect`.
 
 ---
 
-## 📦 Build et Déploiement
+## 📦 Build et Déploiement (Production)
 
 ### 1. Compiler le Projet
-Le projet est packagé sous forme d'un fichier **WAR** (Web Application Archive) à l'aide de Maven.
+Cette commande va créer un fichier `.war` prêt à être déployé.
 
-1.  Ouvrez un terminal à la racine du projet (le répertoire contenant le fichier `pom.xml`).
-2.  Lancez la commande de build Maven :
-    ```bash
-    mvn clean package
-    ```
-3.  Une fois le build terminé avec succès, vous trouverez l'artefact `voyageconnect.war` dans le répertoire `target/`.
+```bash
+# Compiler et packager l'application
+mvn clean package
+```
+Le fichier `voyageconnect.war` sera créé dans le répertoire `target/`.
 
-### 2. Déployer sur Tomcat
-
+### 2. Déployer sur un Serveur Tomcat
 > **Note de compatibilité importante :**
-> Ce projet utilise l'API **`javax.servlet`** pour assurer une compatibilité maximale avec Spring Framework 5. Pour un déploiement sans heurt, il est fortement recommandé d'utiliser un serveur d'applications compatible avec cette spécification, comme **Apache Tomcat 9**.
-> L'utilisation de serveurs plus récents (comme Tomcat 10+) qui implémentent l'API `jakarta.servlet` nécessiterait une migration complète des dépendances et du code source.
+> Ce projet utilise l'API **`javax.servlet`** pour être compatible avec Spring 5. Utilisez un serveur d'applications comme **Apache Tomcat 9**.
 
 1.  **Démarrez votre serveur Apache Tomcat 9.**
-2.  **Copiez** le fichier `target/voyageconnect.war`.
-3.  **Collez-le** dans le répertoire `webapps/` de votre installation Tomcat.
-4.  Tomcat détectera automatiquement le nouveau fichier WAR et déploiera l'application.
-5.  L'application sera accessible à l'URL suivante : `http://localhost:8080/voyageconnect/`
-
-Les logs de l'application seront visibles dans le fichier `logs/catalina.out` de Tomcat, ce qui est utile pour le débogage.
-
----
-
-## ✨ Fonctionnalités Clés
-
-Voici un aperçu des fonctionnalités principales du projet, organisées par module.
-
-### Gestion des Utilisateurs (MVP V1)
-- ✅ Inscription et connexion des utilisateurs.
-- ✅ Gestion des rôles `CLIENT` et `ADMIN` avec Spring Security.
-- 🚧 Espace profil client avec historique des réservations.
-
-### Catalogue et Recherche
-- ✅ Consultation des destinations.
-- ✅ Recherche simple par critère.
-- 🚧 Recherche multicritère dynamique avec AJAX.
-- 🚧 Affichage détaillé des produits (vols, hôtels, circuits).
-
-### Réservation et Paiement
-- 🚧 Processus de réservation en plusieurs étapes.
-- ✅ Simulation de paiement avec confirmation.
-- ✅ Génération de facture au format PDF.
-- 🚧 Intégration des API sandbox Stripe / PayPal.
-
-### Espace Administration
-- ✅ CRUD complet pour la gestion des destinations.
-- 🚧 Dashboard avec statistiques de base.
-- 🚧 CRUD pour les vols, hôtels et circuits.
-
-### Notifications
-- 🚧 Envoi d'email de confirmation de réservation.
-- 🚧 Tâche planifiée pour les rappels de départ.
+2.  **Copiez** le fichier `target/voyageconnect.war` dans le répertoire `webapps/` de votre serveur Tomcat.
+    ```bash
+    # Exemple de commande (adaptez le chemin vers votre Tomcat)
+    cp target/voyageconnect.war /chemin/vers/tomcat/webapps/
+    ```
+3.  Tomcat déploiera automatiquement l'application.

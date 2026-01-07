@@ -12,7 +12,7 @@
         <java.version>11</java.version>
         <spring.version>5.3.34</spring.version>
         <spring.security.version>5.8.12</spring.security.version>
-        <hibernate.version>6.5.2.Final</hibernate.version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
         <postgresql.version>42.7.3</postgresql.version>
         <itext.version>7.2.5</itext.version>
         <javamail.version>2.0.1</javamail.version>
@@ -79,7 +79,7 @@
 
         <!-- Hibernate -->
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
+            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
@@ -172,6 +172,19 @@
                 <version>3.3.2</version>
                  <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.4.54.Final</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/voyageconnect</contextPath>
+                    </webApp>
+                    <httpConnector>
+                        <port>8080</port>
+                    </httpConnector>
                 </configuration>
             </plugin>
         </plugins>

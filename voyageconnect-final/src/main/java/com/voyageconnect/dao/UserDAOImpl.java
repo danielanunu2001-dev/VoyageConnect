@@ -1,9 +1,9 @@
 package com.voyageconnect.dao;
 
 import com.voyageconnect.model.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
